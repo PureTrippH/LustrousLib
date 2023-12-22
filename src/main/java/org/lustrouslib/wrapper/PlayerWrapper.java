@@ -1,0 +1,39 @@
+package org.lustrouslib.wrapper;
+
+import org.bukkit.entity.Player;
+import org.lustrouslib.menu.interfaces.GUIMenu;
+import org.lustrouslib.menu.interfaces.MenuClient;
+
+import java.util.Stack;
+
+public class PlayerWrapper implements MenuClient {
+    Player p;
+    private Stack<GUIMenu> menuStack;
+
+
+    public PlayerWrapper(Player p) {
+        this.p = p;
+        this.menuStack =  new Stack<GUIMenu>();
+    }
+
+    @Override
+    public void pushMenu(GUIMenu menu) {
+        menuStack.push(menu);
+        menu.open(p);
+    }
+
+    @Override
+    public void popMenu() {
+        if (menuStack.size() <= 1) {
+            menuStack.clear();
+            return;
+        }
+        menuStack.pop();
+        menuStack.peek().open(p);
+    }
+
+    @Override
+    public Player getPlayer() {
+        return p;
+    }
+}
