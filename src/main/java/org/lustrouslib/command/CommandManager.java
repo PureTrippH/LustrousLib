@@ -8,23 +8,31 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
+import org.lustrouslib.command.specificmenus.HelpCommand;
 import org.lustrouslib.wrapper.PlayerWrapper;
+import org.lustrouslib.wrapper.StateHandler;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class CommandManager implements CommandExecutor, TabExecutor {
+/**
+ * A Base Command Handler for the Main command.
+ * This Provides a base to all subcommands
+ */
+public class CommandManager<E> implements CommandExecutor, TabExecutor {
     private String msgPrefix = ChatColor.of(new Color(140, 212, 191)) + "Vassals: ";
     private static HashMap<String, SubCommand> commands = new HashMap<>();
-    private JavaPlugin plugin;
+    private StateHandler<E> state;
     private String commandName;
     Set<String> possibleCommands;
 
-    public CommandManager(String commandName, JavaPlugin plugin) {
+    public CommandManager(String commandName, StateHandler state) {
         this.commandName = commandName;
-        this.plugin = plugin;
-        plugin.getCommand(commandName).setExecutor(this);
+        this.state = state;
+        this.registerCommand("help", new HelpCommand());
+        this.possibleCommands = new HashSet<String>();
+        state.getPlugin().getCommand(commandName).setExecutor(this);
     }
 
     public void registerCommand(String commandName, SubCommand cmd) {
