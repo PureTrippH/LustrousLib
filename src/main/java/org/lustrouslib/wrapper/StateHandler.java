@@ -12,6 +12,11 @@ public class StateHandler<E> {
     private JavaPlugin p;
     private WrapperStorage<Player, E> wrapStorage;
 
+    public StateHandler(JavaPlugin p, WrapperStorage<Player, E> wrapStorage) {
+        this.p = p;
+        this.wrapStorage = wrapStorage;
+    }
+
     public JavaPlugin getPlugin() {
         return p;
     }
