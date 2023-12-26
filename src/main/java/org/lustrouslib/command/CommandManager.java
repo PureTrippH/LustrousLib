@@ -20,10 +20,10 @@ import java.util.*;
  * A Base Command Handler for the Main command.
  * This Provides a base to all subcommands
  */
-public class CommandManager<E> implements CommandExecutor, TabExecutor {
+public class CommandManager implements CommandExecutor, TabExecutor {
     private String msgPrefix = ChatColor.of(new Color(140, 212, 191)) + "Vassals: ";
     private static HashMap<String, SubCommand> commands = new HashMap<>();
-    private StateHandler<E> state;
+    private StateHandler<?> state;
     private String commandName;
     Set<String> possibleCommands;
 
@@ -53,17 +53,16 @@ public class CommandManager<E> implements CommandExecutor, TabExecutor {
         }
         Player p = (Player) sender;
         PlayerWrapper wrappedPlayer = new PlayerWrapper(p);
-        p.sendMessage();
         try {
             if (args == null) {
-                commands.get("help").onCommand(wrappedPlayer, args);
+                commands.get("help").onCommand(wrappedPlayer, state, args);
             } else if (args.length == 0) {
-                commands.get("help").onCommand(wrappedPlayer, args);
+                commands.get("help").onCommand(wrappedPlayer, state, args);
             } else if (!commands.containsKey(args[0])) {
                 p.sendMessage(msgPrefix + "Command Does Not Exist! Check the List Below");
-                commands.get("help").onCommand(wrappedPlayer, args);
+                commands.get("help").onCommand(wrappedPlayer, state, args);
             } else {
-                commands.get(args[0]).onCommand(wrappedPlayer, args);
+                commands.get(args[0]).onCommand(wrappedPlayer, state, args);
             }
         } catch(Exception e) {
             p.sendMessage(msgPrefix + e.getMessage());
