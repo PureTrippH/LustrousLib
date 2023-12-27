@@ -23,15 +23,15 @@ import java.util.*;
 public class CommandManager implements CommandExecutor, TabExecutor {
     private String msgPrefix = ChatColor.of(new Color(140, 212, 191)) + "Vassals: ";
     private static HashMap<String, SubCommand> commands = new HashMap<>();
-    private StateHandler<?> state;
+    private StateHandler<? extends PlayerWrapper> state;
     private String commandName;
     Set<String> possibleCommands;
 
     public CommandManager(String commandName, StateHandler state) {
         this.commandName = commandName;
         this.state = state;
-        this.registerCommand("help", new HelpCommand());
         this.possibleCommands = new HashSet<String>();
+        this.registerCommand("help", new HelpCommand());
         state.getPlugin().getCommand(commandName).setExecutor(this);
     }
 

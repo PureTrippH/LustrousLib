@@ -8,6 +8,7 @@ import org.lustrouslib.menu.Menu;
 import org.lustrouslib.menu.MenuIcon;
 import org.lustrouslib.command.SubCommand;
 import org.lustrouslib.menu.interfaces.MenuClient;
+import org.lustrouslib.wrapper.StateHandler;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,12 +16,8 @@ import java.util.List;
 
 public class HelpMenu extends Menu {
 
-    public HelpMenu(HashMap<String, SubCommand> commands, MenuClient mc) {
-        super( "Help Menu", mc);
-        populateItems(commands);
-    }
-    public HelpMenu(HashMap<String, SubCommand> commands) {
-        super( "Help Menu", null);
+    public HelpMenu(HashMap<String, SubCommand> commands, MenuClient mc, StateHandler state) {
+        super( "Help Menu", mc, state.getPlugin());
         populateItems(commands);
     }
 

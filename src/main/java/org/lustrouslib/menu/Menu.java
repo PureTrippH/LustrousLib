@@ -12,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.lustrouslib.menu.interfaces.GUIMenu;
 import org.lustrouslib.menu.interfaces.MenuClient;
 
@@ -34,11 +35,12 @@ public abstract class Menu implements Listener, GUIMenu {
      * @param name String name of inventory.
      * @param page int page number.
      */
-    public Menu(String name, int page, MenuClient user, Plugin pl) {
+    public Menu(String name, int page, MenuClient user, JavaPlugin pl) {
         this.inv = Bukkit.createInventory(null, 9*3, name);
         this.contents = new ArrayList<MenuIcon>();
         initializeItems(page);
         this.pl = pl;
+        this.user = user;
         pl.getServer().getPluginManager().registerEvents(this, pl);
     }
 
@@ -46,8 +48,8 @@ public abstract class Menu implements Listener, GUIMenu {
      * Creates a One Page Menu
      * @param name String name of menu
      */
-    public Menu(String name, MenuClient user) {
-        this(name, 1, user, null);
+    public Menu(String name, MenuClient user, JavaPlugin pl) {
+        this(name, 1, user, pl);
     }
 
 
