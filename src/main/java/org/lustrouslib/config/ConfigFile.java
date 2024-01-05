@@ -17,6 +17,7 @@ public class ConfigFile {
         if (!configFile.exists()) {
             try {
                 configFile.createNewFile();
+                configuration.options().parseComments(true);
             } catch (IOException e) {
                 throw e;
             }
