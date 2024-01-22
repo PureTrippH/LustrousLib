@@ -34,6 +34,10 @@ public class PlayerWrapper implements MenuClient {
         menuStack.peek().open(p);
     }
 
+    public GUIMenu getCurrMenu() {
+        return menuStack.peek();
+    }
+
     @Override
     public Player getPlayer() {
         return p;

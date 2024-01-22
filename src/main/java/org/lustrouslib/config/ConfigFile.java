@@ -1,6 +1,7 @@
 package org.lustrouslib.config;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -15,12 +16,14 @@ public class ConfigFile {
     ConfigFile(Plugin plugin, String name) throws IOException {
         this.configFile = new File(Bukkit.getServer().getPluginManager().getPlugin(plugin.getName()).getDataFolder(), name);
         if (!configFile.exists()) {
-            try {
-                configFile.createNewFile();
-                configuration.options().parseComments(true);
-            } catch (IOException e) {
-                throw e;
-            }
+            plugin.saveResource(name, false);
+        }
+        configuration = new YamlConfiguration();
+        configuration.options().parseComments(true);
+        try {
+            configuration.load(configFile);
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
         }
         configuration = YamlConfiguration.loadConfiguration(configFile);
     }

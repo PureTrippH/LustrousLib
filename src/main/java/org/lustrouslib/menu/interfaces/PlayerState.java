@@ -9,7 +9,9 @@ import org.lustrouslib.wrapper.StateHandler;
  * Interface for a left & right click action state.
  */
 public interface PlayerState<E> {
-    public Menu getPrevMenu();
-    public Menu getCurrMenu();
-    public void destruct(StateHandler<E> pw);
+    public GUIMenu getPrevMenu();
+    public GUIMenu getCurrMenu();
+    public void destruct(PlayerWrapper pw);
+    public void setCurrMenu(GUIMenu menu);
+    public void setPrevMenu(GUIMenu menu);
 }

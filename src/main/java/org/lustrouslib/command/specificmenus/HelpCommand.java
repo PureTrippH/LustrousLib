@@ -10,6 +10,9 @@ import org.lustrouslib.menu.specificmenus.HelpMenu;
 import org.lustrouslib.wrapper.PlayerWrapper;
 import org.lustrouslib.wrapper.StateHandler;
 
+import java.util.Collections;
+import java.util.List;
+
 public class HelpCommand implements SubCommand {
     public final String name = "Help";
     public final String desc = ChatColor.WHITE + "Sends a list of all of the commands in Vassals\n" + ChatColor.GREEN + "Usage: " + ChatColor.WHITE + "/vassal help";
@@ -23,5 +26,10 @@ public class HelpCommand implements SubCommand {
     }
     public String getDesc() {
         return desc;
+    }
+
+    @Override
+    public List<String> getPossibleArguments(int argIndex) {
+        return Collections.EMPTY_LIST;
     }
 }

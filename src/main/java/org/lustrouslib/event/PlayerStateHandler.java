@@ -1,6 +1,7 @@
 package org.lustrouslib.event;
 
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -30,7 +31,7 @@ public class PlayerStateHandler implements Listener {
         PlayerWrapper wp = state.getPlayerWrapper(e.getPlayer());
         if (wp.getState() == null) return;
         if (!(wp.getState() instanceof ClickablePlayerState)) return;
-        ClickablePlayerState currState = (ClickablePlayerState) wp;
+        ClickablePlayerState currState = (ClickablePlayerState) wp.getState();
         e.setCancelled(true);
         if (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_AIR) {
             currState.leftClickAction(e, wp);
@@ -46,8 +47,11 @@ public class PlayerStateHandler implements Listener {
         PlayerWrapper wp = state.getPlayerWrapper(e.getPlayer());
         if (wp.getState() == null) return;
         if (!(wp.getState() instanceof ChatCatchPlayerState)) return;
-        ChatCatchPlayerState currState = (ChatCatchPlayerState) wp;
+        ChatCatchPlayerState currState = (ChatCatchPlayerState) wp.getState();
         e.setCancelled(true);
-        currState.chatAction(e, wp);
+        Bukkit.getScheduler().callSyncMethod(state.getPlugin(), () -> {
+            currState.chatAction(e, wp);
+            return null;
+        });
     }
 }

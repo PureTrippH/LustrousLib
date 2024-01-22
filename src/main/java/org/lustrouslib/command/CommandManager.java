@@ -1,6 +1,7 @@
 package org.lustrouslib.command;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -75,6 +76,22 @@ public class CommandManager implements CommandExecutor, TabExecutor {
         final List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             StringUtil.copyPartialMatches(args[0], possibleCommands, completions);
+            Collections.sort(completions);
+            return completions;
+        } else if (args.length > 1) {
+            SubCommand selectedCmd = commands.get(args[0]);
+            if (selectedCmd == null) return Collections.EMPTY_LIST;
+            List<String> currentPossibleArgs = selectedCmd.getPossibleArguments(args.length - 1);
+            if (currentPossibleArgs == null) return Collections.EMPTY_LIST;
+            if(currentPossibleArgs.size() == 1 && currentPossibleArgs.get(0) == "allOnlinePlayers") {
+                //TODO: Make a static instance of this
+                List<String> list = new ArrayList<String>();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    list.add(p.getName());
+                }
+                return list;
+            }
+            StringUtil.copyPartialMatches(args[args.length - 1], currentPossibleArgs, completions);
             Collections.sort(completions);
             return completions;
         }
