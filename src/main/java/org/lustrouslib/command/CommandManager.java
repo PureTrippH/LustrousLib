@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class CommandManager implements CommandExecutor, TabExecutor {
     private String msgPrefix = ChatColor.of(new Color(140, 212, 191)) + "Vassals: ";
-    private static HashMap<String, SubCommand> commands = new HashMap<>();
+    private HashMap<String, SubCommand> commands;
     private StateHandler<? extends PlayerWrapper> state;
     private String commandName;
     Set<String> possibleCommands;
@@ -32,17 +32,14 @@ public class CommandManager implements CommandExecutor, TabExecutor {
         this.commandName = commandName;
         this.state = state;
         this.possibleCommands = new HashSet<String>();
-        this.registerCommand("help", new HelpCommand());
+        this.commands = new HashMap<String, SubCommand>();
+        this.registerCommand("help", new HelpCommand(commands));
         state.getPlugin().getCommand(commandName).setExecutor(this);
     }
 
     public void registerCommand(String commandName, SubCommand cmd) {
         this.commands.put(commandName, cmd);
         this.possibleCommands.add(commandName);
-    }
-
-    public static HashMap<String, SubCommand> getCommands() {
-        return commands;
     }
 
     @Override
@@ -52,6 +49,7 @@ public class CommandManager implements CommandExecutor, TabExecutor {
         if (!command.getName().equalsIgnoreCase(this.commandName)) {
             return true;
         }
+        Bukkit.getLogger().warning(commandName);
         Player p = (Player) sender;
         PlayerWrapper wrappedPlayer = new PlayerWrapper(p);
         try {

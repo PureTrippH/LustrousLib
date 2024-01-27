@@ -14,6 +14,7 @@ public class LustrousLib extends JavaPlugin {
         Bukkit.getLogger().info(ChatColor.AQUA + "----------------------");
         Bukkit.getLogger().info(ChatColor.DARK_AQUA + "LustrousLib: " + ChatColor.GREEN + "Enabled");
         Bukkit.getLogger().info(ChatColor.AQUA + "----------------------");
+
     }
 
     @Override

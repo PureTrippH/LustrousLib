@@ -22,4 +22,8 @@ public class Parser {
             }
         }
     }
+
+    public void getConfigSetting(String path) {
+        file.getConfigFile().get(path);
+    }
 }
