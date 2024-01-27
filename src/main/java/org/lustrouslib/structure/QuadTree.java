@@ -82,12 +82,48 @@ public class QuadTree<E> {
         }
     }
 
+    /**
+     * Given a point, find the data in that square
+     * @param x double X of input Point
+     * @param y double Y of input Point
+     */
+    public List<QuadTreeNode<E>> query(double x, double y) {
+        List<QuadTreeNode<E>> results = queryHelper(new Vector(x, y, 0), root);
+        return results;
+    }
+
+    private List<QuadTreeNode<E>> queryHelper(Vector currPos, QuadTreeSquare curr) {
+        if (curr.dataInSquare.size() < capacity) {
+            return curr.dataInSquare;
+        } else {
+            for (int i = 0; i < 4; i++) {
+                if (currPos.isInAABB(curr.subsquares[i].blCorner, curr.subsquares[i].trCorner)) {
+                    return queryHelper(currPos, curr.subsquares[i]);
+                }
+            }
+        }
+        return null;
+    }
+
     private void subdivide(QuadTreeSquare curr) {
         if(curr.dataInSquare.size() == capacity) {
-            Vector squareCenter = new Vector((curr.blCorner.getY() + curr.tlCorner.getY())/2,
-                    (curr.blCorner.getX() + curr.brCorner.getX())/2, 0);
+            double width = curr.blCorner.getX() + curr.brCorner.getX();
+            double height = curr.blCorner.getY() + curr.tlCorner.getY();
+            Vector squareCenter = new Vector(width/2,
+                    (height)/2, 0);
             List<QuadTreeNode<E>> savedNodes = curr.dataInSquare;
-            //curr.subsquares[0] = new QuadTreeSquare(squareCenter)
+            curr.subsquares[0] = new QuadTreeSquare(squareCenter, squareCenter.clone().add(new Vector(width/2, 0, 0)),
+                    curr.corners.get(2), squareCenter.clone().add(new Vector(0, height/2, 0)));
+            curr.subsquares[1] = new QuadTreeSquare(squareCenter.clone().add(new Vector(-width/2, 0, 0)),
+                    squareCenter, squareCenter.clone().add(new Vector(0, height/2, 0)),curr.corners.get(3));
+            curr.subsquares[2] = new QuadTreeSquare(curr.corners.get(0),
+                    squareCenter.clone().add(new Vector(0, -height/2, 0)), squareCenter,
+                    squareCenter.clone().add(new Vector(-width/2, 0, 0)));
+            curr.subsquares[3] = new QuadTreeSquare(squareCenter.clone().add(new Vector(0, -height/2, 0)),
+                    curr.corners.get(1), squareCenter.clone().add(new Vector(width/2, 0, 0)), squareCenter);
+            for (QuadTreeNode<E> data : curr.dataInSquare) {
+                insertHelper(data, curr);
+            }
         }
     }
 
