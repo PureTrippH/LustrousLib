@@ -1,6 +1,7 @@
 package org.lustrouslib.structure;
 
 import org.bukkit.util.Vector;
+import org.lustrouslib.geometry.GeometricAlgorithms;
 import org.lustrouslib.geometry.Polygon;
 
 import java.lang.reflect.Array;
@@ -166,8 +167,8 @@ public class QuadTree<E> {
             for (int cornerIndex = 0; cornerIndex < curr.corners.size(); cornerIndex++) {
                 Vector cVec = curr.corners.get(cornerIndex % curr.corners.size());
                 Vector dVec = curr.corners.get((cornerIndex + 1) % curr.corners.size());
-                if (ccw(aVec, bVec, cVec).crossProduct(ccw(aVec, bVec, cVec)).getZ() < 0
-                    && ccw(cVec, dVec, aVec).crossProduct(ccw(cVec, dVec, bVec)).getZ() < 0) {
+                if (GeometricAlgorithms.ccw(aVec, bVec, cVec).crossProduct(GeometricAlgorithms.ccw(aVec, bVec, cVec)).getZ() < 0
+                    && GeometricAlgorithms.ccw(cVec, dVec, aVec).crossProduct(GeometricAlgorithms.ccw(cVec, dVec, bVec)).getZ() < 0) {
                     return true;
                 }
             }
@@ -177,12 +178,6 @@ public class QuadTree<E> {
 
     public int getSize() {
        return size;
-    }
-
-    private Vector ccw(Vector a, Vector b, Vector c) {
-        Vector ba = b.clone().subtract(a.clone());
-        Vector ca = c.clone().subtract(a.clone());
-        return ba.crossProduct(ca);
     }
 
     public QuadTreeSquare getRoot() {
