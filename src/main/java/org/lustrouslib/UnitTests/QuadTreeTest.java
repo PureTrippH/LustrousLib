@@ -18,7 +18,7 @@ public class QuadTreeTest {
     @Before
     public void setUp() {
         tree = new QuadTree<>(new Vector(0, 0, 0), new Vector(100, 0, 0),
-                new Vector(100, 100, 0), new Vector(0, 100, 0), 2);
+                new Vector(100, 0, 100), new Vector(0, 0, 100), 2);
     }
 
     @Test(timeout = TIMEOUT)
@@ -28,9 +28,9 @@ public class QuadTreeTest {
 
     @Test(timeout = TIMEOUT)
     public void testAdd() {
-        Vector v1 = new Vector(10, 10, 0);
-        Vector v2 = new Vector(20, 10, 0);
-        Vector v3 = new Vector(15, 35, 0);
+        Vector v1 = new Vector(10, 0, 10);
+        Vector v2 = new Vector(20, 0, 10);
+        Vector v3 = new Vector(15, 0, 35);
         ArrayList<Vector> polygon = new ArrayList<Vector>();
         polygon.add(v1);
         polygon.add(v2);
@@ -43,26 +43,26 @@ public class QuadTreeTest {
     public void testBorderInit() {
         assertEquals("0.0,0.0,0.0", tree.getRoot().blCorner.toString());
         assertEquals("100.0,0.0,0.0", tree.getRoot().brCorner.toString());
-        assertEquals("100.0,100.0,0.0", tree.getRoot().trCorner.toString());
-        assertEquals("0.0,100.0,0.0", tree.getRoot().tlCorner.toString());
+        assertEquals("100.0,0.0,100.0", tree.getRoot().trCorner.toString());
+        assertEquals("0.0,0.0,100.0", tree.getRoot().tlCorner.toString());
     }
 
     @Test(timeout = TIMEOUT)
     public void testMergedAdd() {
-        Vector v1 = new Vector(10, 10, 0);
-        Vector v3 = new Vector(60, 10, 0);
-        Vector v2 = new Vector(60, 60, 0);
-        Vector v4 = new Vector(10, 60, 0);
+        Vector v1 = new Vector(10, 0, 10);
+        Vector v3 = new Vector(60, 0, 10);
+        Vector v2 = new Vector(60, 0, 60);
+        Vector v4 = new Vector(10, 0, 60);
         ArrayList<Vector> polygon1 = new ArrayList<Vector>();
         polygon1.add(v1);
         polygon1.add(v2);
         polygon1.add(v3);
         polygon1.add(v4);
         tree.insert(new Polygon(polygon1), 12);
-        Vector v1b = new Vector(90, 90, 0);
-        Vector v2b = new Vector(90,80, 0);
-        Vector v3b = new Vector(80,80, 0);
-        Vector v4b = new Vector(80,90, 0);
+        Vector v1b = new Vector(90, 0, 90);
+        Vector v2b = new Vector(90,0, 80);
+        Vector v3b = new Vector(80,0, 80);
+        Vector v4b = new Vector(80,0, 90);
         ArrayList<Vector> polygon2 = new ArrayList<Vector>();
         polygon2.add(v1b);
         polygon2.add(v2b);
@@ -79,20 +79,20 @@ public class QuadTreeTest {
 
     @Test(timeout = TIMEOUT)
     public void testQuery() {
-        Vector v1 = new Vector(10, 10, 0);
-        Vector v3 = new Vector(60, 10, 0);
-        Vector v2 = new Vector(60, 60, 0);
-        Vector v4 = new Vector(10, 60, 0);
+        Vector v1 = new Vector(10, 0, 10);
+        Vector v3 = new Vector(60, 0, 10);
+        Vector v2 = new Vector(60, 0, 60);
+        Vector v4 = new Vector(10, 0, 60);
         ArrayList<Vector> polygon1 = new ArrayList<Vector>();
         polygon1.add(v1);
         polygon1.add(v2);
         polygon1.add(v3);
         polygon1.add(v4);
         tree.insert(new Polygon(polygon1), 12);
-        Vector v1b = new Vector(90, 90, 0);
-        Vector v2b = new Vector(90,80, 0);
-        Vector v3b = new Vector(80,80, 0);
-        Vector v4b = new Vector(80,90, 0);
+        Vector v1b = new Vector(90, 0, 90);
+        Vector v2b = new Vector(90,0, 80);
+        Vector v3b = new Vector(80,0, 80);
+        Vector v4b = new Vector(80,0, 90);
         ArrayList<Vector> polygon2 = new ArrayList<Vector>();
         polygon2.add(v1b);
         polygon2.add(v2b);

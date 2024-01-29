@@ -16,61 +16,61 @@ public class ConvexTest {
     public void testBasicTriangle() {
         ArrayList<Vector> vecList = new ArrayList<Vector>();
         vecList.add(new Vector(0, 0, 0));
-        vecList.add(new Vector(0, 5, 0));
-        vecList.add(new Vector(3, 5, 0));
+        vecList.add(new Vector(0, 0, 5));
+        vecList.add(new Vector(3, 0, 5));
         LinkedList<Vector> hull = GeometricAlgorithms.convexHull(vecList);
         assertEquals(3, hull.size());
         assertEquals((int) 0, (int) hull.get(0).getX());
-        assertEquals((int) 0, (int) hull.get(0).getY());
+        assertEquals((int) 0, (int) hull.get(0).getZ());
 
         assertEquals((int) 3, (int) hull.get(1).getX());
-        assertEquals((int) 5, (int) hull.get(1).getY());
+        assertEquals((int) 5, (int) hull.get(1).getZ());
 
         assertEquals((int) 0, (int) hull.get(2).getX());
-        assertEquals((int) 5, (int) hull.get(2).getY());
+        assertEquals((int) 5, (int) hull.get(2).getZ());
     }
 
     @Test(timeout = TIMEOUT)
     public void testTriangleCenterPoint() {
         ArrayList<Vector> vecList = new ArrayList<Vector>();
         vecList.add(new Vector(0, 0, 0));
-        vecList.add(new Vector(0, 5, 0));
-        vecList.add(new Vector(3, 5, 0));
-        vecList.add(new Vector(1, 4, 0));
+        vecList.add(new Vector(0, 0, 5));
+        vecList.add(new Vector(3, 0, 5));
+        vecList.add(new Vector(1, 0, 4));
         LinkedList<Vector> hull = GeometricAlgorithms.convexHull(vecList);
         assertEquals(3, hull.size());
         assertEquals((int) 0, (int) hull.get(0).getX());
-        assertEquals((int) 0, (int) hull.get(0).getY());
+        assertEquals((int) 0, (int) hull.get(0).getZ());
 
         assertEquals((int) 3, (int) hull.get(1).getX());
-        assertEquals((int) 5, (int) hull.get(1).getY());
+        assertEquals((int) 5, (int) hull.get(1).getZ());
 
         assertEquals((int) 0, (int) hull.get(2).getX());
-        assertEquals((int) 5, (int) hull.get(2).getY());
+        assertEquals((int) 5, (int) hull.get(2).getZ());
     }
 
     @Test(timeout = TIMEOUT)
     public void testSquareCenterDot() {
         ArrayList<Vector> vecList = new ArrayList<Vector>();
         vecList.add(new Vector(0, 0, 0));
-        vecList.add(new Vector(0, 5, 0));
-        vecList.add(new Vector(5, 5, 0));
+        vecList.add(new Vector(0, 0, 5));
+        vecList.add(new Vector(5, 0, 5));
         vecList.add(new Vector(5, 0, 0));
-        vecList.add(new Vector(3, 2, 0));
+        vecList.add(new Vector(3, 0, 2));
         LinkedList<Vector> hull = GeometricAlgorithms.convexHull(vecList);
         assertEquals(4, hull.size());
 
         assertEquals((int) 0, (int) hull.get(0).getX());
-        assertEquals((int) 0, (int) hull.get(0).getY());
+        assertEquals((int) 0, (int) hull.get(0).getZ());
 
         assertEquals((int) 5, (int) hull.get(1).getX());
-        assertEquals((int) 0, (int) hull.get(1).getY());
+        assertEquals((int) 0, (int) hull.get(1).getZ());
 
         assertEquals((int) 5, (int) hull.get(2).getX());
-        assertEquals((int) 5, (int) hull.get(2).getY());
+        assertEquals((int) 5, (int) hull.get(2).getZ());
 
         assertEquals((int) 0, (int) hull.get(3).getX());
-        assertEquals((int) 5, (int) hull.get(3).getY());
+        assertEquals((int) 5, (int) hull.get(3).getZ());
 
     }
 
@@ -79,40 +79,40 @@ public class ConvexTest {
         // Test case with colinear points, duplicate points, and random points
         ArrayList<Vector> vecList = new ArrayList<>();
         vecList.add(new Vector(0, 0, 0));
-        vecList.add(new Vector(1, 1, 0));
-        vecList.add(new Vector(2, 2, 0));
-        vecList.add(new Vector(3, 3, 0));
-        vecList.add(new Vector(4, 4, 0));
-        vecList.add(new Vector(5, 5, 0));
-        vecList.add(new Vector(6, 6, 0));
-        vecList.add(new Vector(1, 6, 0));
-        vecList.add(new Vector(7, 7, 0));
-        vecList.add(new Vector(7, 6, 0));
-        vecList.add(new Vector(8, 8, 0));
-        vecList.add(new Vector(9, 9, 0));
-        vecList.add(new Vector(1, 1, 0)); // Duplicate point
-        vecList.add(new Vector(3, 3, 0)); // Duplicate point
-        vecList.add(new Vector(5, 5, 0)); // Duplicate point
-        vecList.add(new Vector(7, 7, 0)); // Duplicate point
-        vecList.add(new Vector(9, 9, 0)); // Duplicate point
+        vecList.add(new Vector(1, 0, 1));
+        vecList.add(new Vector(2, 0, 2));
+        vecList.add(new Vector(3, 0, 3));
+        vecList.add(new Vector(4, 0, 4));
+        vecList.add(new Vector(5, 0, 5));
+        vecList.add(new Vector(6, 0, 6));
+        vecList.add(new Vector(1, 0, 6));
+        vecList.add(new Vector(7, 0, 7));
+        vecList.add(new Vector(7, 0, 6));
+        vecList.add(new Vector(8, 0, 8));
+        vecList.add(new Vector(9, 0, 9));
+        vecList.add(new Vector(1, 0, 1)); // Duplicate point
+        vecList.add(new Vector(3, 0, 3)); // Duplicate point
+        vecList.add(new Vector(5, 0, 5)); // Duplicate point
+        vecList.add(new Vector(7, 0, 7)); // Duplicate point
+        vecList.add(new Vector(9, 0, 9)); // Duplicate point
         vecList.add(new Vector(10, 0, 0));
-        vecList.add(new Vector(0, 10, 0));
+        vecList.add(new Vector(0, 0, 10));
 
         LinkedList<Vector> hull = GeometricAlgorithms.convexHull(vecList);
 
         assertEquals(4, hull.size());
 
         assertEquals(0, (int) hull.get(0).getX());
-        assertEquals(0, (int) hull.get(0).getY());
+        assertEquals(0, (int) hull.get(0).getZ());
 
         assertEquals(10, (int) hull.get(1).getX());
-        assertEquals(0, (int) hull.get(1).getY());
+        assertEquals(0, (int) hull.get(1).getZ());
 
         assertEquals(9, (int) hull.get(2).getX());
-        assertEquals(9, (int) hull.get(2).getY());
+        assertEquals(9, (int) hull.get(2).getZ());
 
         assertEquals(0, (int) hull.get(3).getX());
-        assertEquals(10, (int) hull.get(3).getY());
+        assertEquals(10, (int) hull.get(3).getZ());
 
     }
 }

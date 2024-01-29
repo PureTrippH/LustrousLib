@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public class Polygon {
-    private LinkedList<Vector> vertices;
+    private List<Vector> vertices;
 
     public Polygon(List<Vector> vertices) {
         this.vertices = GeometricAlgorithms.convexHull(vertices);
@@ -30,6 +30,10 @@ public class Polygon {
         }
     }
 
+    /**
+     *
+     * @param v
+     */
     public void addPoint(Vector v) {
         //Determine if point is inside the hull. If not, don't add
         if (!containsPoint(v)) {

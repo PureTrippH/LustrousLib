@@ -7,6 +7,7 @@ import org.lustrouslib.geometry.Polygon;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * A QuadTree-RTree Hybrid Implementation for 2d Queries
@@ -30,7 +31,7 @@ public class QuadTree<E> {
     /**
      * The Representation of a Square of data
      */
-     public class QuadTreeSquare {
+    public class QuadTreeSquare {
         public Vector blCorner;
         public Vector brCorner;
         public Vector trCorner;
@@ -101,10 +102,10 @@ public class QuadTree<E> {
     /**
      * Given a point, find the data in that square
      * @param x double X of input Point
-     * @param y double Y of input Point
+     * @param z double Y of input Point
      */
-    public List<QuadTreeNode<E>> query(double x, double y) {
-        List<QuadTreeNode<E>> results = queryHelper(new Vector(x, y, 0), root);
+    public List<QuadTreeNode<E>> query(double x, double z) {
+        List<QuadTreeNode<E>> results = queryHelper(new Vector(x, 0, z), root);
         return results;
     }
 
@@ -118,24 +119,24 @@ public class QuadTree<E> {
                 }
             }
         }
-        return null;
+        throw new NoSuchElementException("Element is not In the QuadTree!");
     }
 
     private void subdivide(QuadTreeSquare curr) {
         if(curr.dataInSquare.size() == capacity) {
             double width = curr.corners.get(0).getX() + curr.corners.get(1).getX();
-            double height = curr.corners.get(0).getY() + curr.corners.get(3).getY();
+            double height = curr.corners.get(0).getZ() + curr.corners.get(3).getZ();
             Vector squareCenter = new Vector(width/2,
-                    (height)/2, 0);
+                    0, (height)/2);
             List<QuadTreeNode<E>> savedNodes = curr.dataInSquare;
             curr.subsquares[0] = new QuadTreeSquare(squareCenter, squareCenter.clone().add(new Vector(width/2, 0, 0)),
-                    curr.corners.get(2), squareCenter.clone().add(new Vector(0, height/2, 0)));
+                    curr.corners.get(2), squareCenter.clone().add(new Vector(0, 0, height/2)));
             curr.subsquares[1] = new QuadTreeSquare(squareCenter.clone().add(new Vector(-width/2, 0, 0)),
-                    squareCenter, squareCenter.clone().add(new Vector(0, height/2, 0)),curr.corners.get(3));
+                    squareCenter, squareCenter.clone().add(new Vector(0, 0, height/2)),curr.corners.get(3));
             curr.subsquares[2] = new QuadTreeSquare(curr.corners.get(0),
-                    squareCenter.clone().add(new Vector(0, -height/2, 0)), squareCenter,
+                    squareCenter.clone().add(new Vector(0, 0, -height/2)), squareCenter,
                     squareCenter.clone().add(new Vector(-width/2, 0, 0)));
-            curr.subsquares[3] = new QuadTreeSquare(squareCenter.clone().add(new Vector(0, -height/2, 0)),
+            curr.subsquares[3] = new QuadTreeSquare(squareCenter.clone().add(new Vector(0, 0, -height/2)),
                     curr.corners.get(1), squareCenter.clone().add(new Vector(width/2, 0, 0)), squareCenter);
             quadrants += 4;
             curr.hasOverflowed = true;
@@ -167,8 +168,8 @@ public class QuadTree<E> {
             for (int cornerIndex = 0; cornerIndex < curr.corners.size(); cornerIndex++) {
                 Vector cVec = curr.corners.get(cornerIndex % curr.corners.size());
                 Vector dVec = curr.corners.get((cornerIndex + 1) % curr.corners.size());
-                if (GeometricAlgorithms.ccw(aVec, bVec, cVec).crossProduct(GeometricAlgorithms.ccw(aVec, bVec, cVec)).getZ() < 0
-                    && GeometricAlgorithms.ccw(cVec, dVec, aVec).crossProduct(GeometricAlgorithms.ccw(cVec, dVec, bVec)).getZ() < 0) {
+                if (GeometricAlgorithms.ccw(aVec, bVec, cVec).crossProduct(GeometricAlgorithms.ccw(aVec, bVec, cVec)).getY() < 0
+                        && GeometricAlgorithms.ccw(cVec, dVec, aVec).crossProduct(GeometricAlgorithms.ccw(cVec, dVec, bVec)).getY() < 0) {
                     return true;
                 }
             }
@@ -177,7 +178,7 @@ public class QuadTree<E> {
     }
 
     public int getSize() {
-       return size;
+        return size;
     }
 
     public QuadTreeSquare getRoot() {

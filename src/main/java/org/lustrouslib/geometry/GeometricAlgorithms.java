@@ -15,21 +15,17 @@ public class GeometricAlgorithms {
         LinkedList<Vector> hull = new LinkedList<Vector>();
         Vector minVert = vertexSet.get(0);
         for (Vector vert : vertexSet) {
-            minVert = (vert.getY() < minVert.getY()) ? vert : minVert;
+            minVert = (vert.getZ() < minVert.getZ()) ? vert : minVert;
         }
         Stack<Vector> hullStack = new Stack<Vector>();
         Collections.sort(vertexSet, new PolarAngleComparator(minVert));
 
         hullStack.push(vertexSet.get(0));
         hullStack.push(vertexSet.get(1));
-
-        for (Vector v : vertexSet) {
-            System.out.println(v);
-        }
         for(int i = 2; i < vertexSet.size(); i++) {
             Vector candidate = vertexSet.get(i);
             Vector prev = hullStack.pop();
-            while (hullStack.peek() != null && ccw(hullStack.peek(), prev, candidate).getZ() <= 0) {
+            while (hullStack.peek() != null && ccw(hullStack.peek(), prev, candidate).getY() >= 0) {
                 prev = hullStack.pop();
             }
             hullStack.push(prev);
@@ -53,8 +49,8 @@ public class GeometricAlgorithms {
 
         @Override
         public int compare(Vector v1, Vector v2) {
-            double angle1 = Math.atan2(v1.getY() - anchor.getY(), v1.getX() - anchor.getX());
-            double angle2 = Math.atan2(v2.getY() - anchor.getY(), v2.getX() - anchor.getX());
+            double angle1 = Math.atan2(v1.getZ() - anchor.getZ(), v1.getX() - anchor.getX());
+            double angle2 = Math.atan2(v2.getZ() - anchor.getZ(), v2.getX() - anchor.getX());
             if (angle1 < angle2) {
                 return -1;
             } else if (angle1 > angle2) {
