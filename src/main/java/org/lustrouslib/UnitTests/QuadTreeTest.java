@@ -153,4 +153,46 @@ public class QuadTreeTest {
         assertEquals(0, tree.query(15, 10).size());
     }
 
+
+    @Test(timeout = TIMEOUT)
+    public void testUpdate() {
+        Vector v1 = new Vector(10, 0, 10);
+        Vector v2 = new Vector(20, 0, 10);
+        Vector v3 = new Vector(15, 0, 35);
+        ArrayList<Vector> polygon = new ArrayList<Vector>();
+        polygon.add(v1);
+        polygon.add(v2);
+        polygon.add(v3);
+        Polygon oldPoly = new Polygon(polygon);
+        tree.insert(oldPoly, 12);
+        assertEquals(12, (int) (tree.query(15, 10).get(0).value));
+
+        //Add Two To Cause a Split
+
+        Vector v12 = new Vector(90, 0, 90);
+        Vector v22 = new Vector(90, 0, 95);
+        Vector v32 = new Vector(100, 0, 100);
+        ArrayList<Vector> polygon2 = new ArrayList<Vector>();
+        polygon2.add(v12);
+        polygon2.add(v22);
+        polygon2.add(v32);
+        tree.insert(new Polygon(polygon2), 1);
+        assertEquals(1, (int) (tree.query(90, 90).get(0).value));
+
+        //New Polygon
+
+        Vector v1n = new Vector(10, 0, 10);
+        Vector v2n = new Vector(20, 0, 10);
+        Vector v3n = new Vector(15, 0, 35);
+        Vector v4n = new Vector(60, 0, 60);
+        ArrayList<Vector> newPoly = new ArrayList<Vector>();
+        newPoly.add(v1n);
+        newPoly.add(v2n);
+        newPoly.add(v3n);
+        newPoly.add(v4n);
+        Polygon newPolyToCheck = new Polygon(newPoly);
+        tree.update(12, oldPoly, newPolyToCheck);
+        assertEquals(12, (int) tree.query(60,60).get(0).value);
+    }
+
 }

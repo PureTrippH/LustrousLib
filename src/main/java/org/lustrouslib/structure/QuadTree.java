@@ -27,6 +27,13 @@ public class QuadTree<E> {
             this.polygon = polygon;
             this.value = value;
         }
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof QuadTreeNode)) return false;
+            QuadTreeNode<E> compNode = (QuadTreeNode<E>) o;
+            if (compNode.polygon.equals(this.polygon)) return true;
+            return false;
+        }
     }
 
     /**
@@ -151,11 +158,40 @@ public class QuadTree<E> {
      * @param newPolygon
      */
     public void update(E data, Polygon oldPolygon, Polygon newPolygon) {
-
+        updateHelper(root, data, oldPolygon, newPolygon);
     }
 
-    private void updatePolygon(QuadTreeSquare curr, E data, Polygon oldPolygon, Polygon newPolygon) {
-
+    private void updateHelper(QuadTreeSquare curr, E data, Polygon oldPolygon, Polygon newPolygon) {
+        if(curr == null) {
+            return;
+        }
+        //Will not run if size == 0
+        for (QuadTreeNode<E> currNode : curr.dataInSquare) {
+            //If the Old polygon is in the square, then see if new still fits. If not, remove
+            if (currNode.polygon.equals(oldPolygon)) {
+                if(!checkCollision(curr, newPolygon)) {
+                    removeWithPolyHelper(data, oldPolygon, curr);
+                } else {
+                    currNode.polygon = newPolygon;
+                }
+            }
+        }
+        if (checkCollision(curr, newPolygon) && curr.hasOverflowed == false) {
+            //If new Polygon Belongs, then add it
+            insertHelper(new QuadTreeNode<E>(newPolygon, data), curr);
+        }
+        for (QuadTreeSquare square : curr.subsquares) {
+            //Go Find Portions of the Tree Where Old Polygon is to remove
+            if (checkCollision(square, oldPolygon)) {
+                updateHelper(square, data, oldPolygon, newPolygon);
+                return;
+            }
+            //Find Portions with new to Add To Them
+            if (checkCollision(square, newPolygon)) {
+                updateHelper(square, data, oldPolygon, newPolygon);
+                return;
+            }
+        }
     }
 
     private QuadTreeSquare removeWithPolyHelper(E data, Polygon poly, QuadTreeSquare curr) {
@@ -210,6 +246,9 @@ public class QuadTree<E> {
 
     private void insertHelper(QuadTreeNode<E> node, QuadTreeSquare curr) {
         if (curr.dataInSquare.size() < capacity && !curr.hasOverflowed) {
+            if (curr.dataInSquare.contains(node)) {
+                return;
+            }
             curr.dataInSquare.add(node);
             size++;
             subdivide(curr);
@@ -249,6 +288,7 @@ public class QuadTree<E> {
 
     private void subdivide(QuadTreeSquare curr) {
         if(curr.dataInSquare.size() == capacity) {
+            System.out.println("Overflow test");
             double width = curr.corners.get(0).getX() + curr.corners.get(1).getX();
             double height = curr.corners.get(0).getZ() + curr.corners.get(3).getZ();
             Vector squareCenter = new Vector(width/2,

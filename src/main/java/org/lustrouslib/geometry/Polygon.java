@@ -3,10 +3,7 @@ package org.lustrouslib.geometry;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class Polygon {
     private List<Vector> vertices;
@@ -78,6 +75,18 @@ public class Polygon {
         }
 
         return (intersections % 2 == 1);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Polygon)) return false;
+        Polygon poly = (Polygon) o;
+        if(poly.vertices.size() != this.vertices.size()) return false;
+        HashSet<Vector> thisPolySet = new HashSet<Vector>();
+        thisPolySet.addAll(this.vertices);
+        HashSet<Vector> otherPolySet = new HashSet<Vector>();
+        otherPolySet.addAll(poly.vertices);
+        return thisPolySet.equals(otherPolySet);
     }
 
 }
