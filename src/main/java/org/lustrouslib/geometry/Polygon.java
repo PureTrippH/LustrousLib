@@ -37,7 +37,9 @@ public class Polygon {
     public void addPoint(Vector v) {
         //Determine if point is inside the hull. If not, don't add
         if (!containsPoint(v)) {
-
+            //TODO: Max and Min tangent
+            vertices.add(v);
+            this.vertices = GeometricAlgorithms.convexHull(vertices);
         }
     }
 

@@ -6,6 +6,7 @@ import org.lustrouslib.geometry.Polygon;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -66,6 +67,22 @@ public class QuadTree<E> {
     private int quadrants;
 
     /**
+     * Returns the amount of data in the quadtree
+     * @return
+     */
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * Returns the root of the Quadtree, or the universe
+     * @return QuadTreeSquare containing bounds and data
+     */
+    public QuadTreeSquare getRoot() {
+        return root;
+    }
+
+    /**
      * Creates a Quadtree with a set boundary for the universe
      * @param blCorner Bottom left Vector of the Boundary
      * @param brCorner Bottom Right Vector of the Boundary
@@ -79,8 +96,116 @@ public class QuadTree<E> {
         this.quadrants = 0;
     }
 
+    public QuadTree(Vector blCorner, Vector trCorner, int capacity) {
+        this(blCorner, blCorner.clone().add(new Vector(trCorner.getX(), 0, 0)),
+                trCorner, blCorner.clone().add(new Vector(0, 0, trCorner.getZ())), capacity);
+    }
+
+    /**
+     * Inserts a new Polygonal region into the quad tree
+     * @param polygon Polygon defining the addition region in th tree
+     * @param data E data to pass in
+     */
     public void insert(Polygon polygon, E data) {
+        for (Vector vec : polygon.getVertices()) {
+            if (!(vec.clone().isInAABB(root.blCorner, root.trCorner))) {
+                resize();
+                insert(polygon, data);
+                return;
+            }
+        }
         insertHelper(new QuadTreeNode<E>(polygon, data), root);
+    }
+
+    /**
+     * Returns a rough in-order like traversal of the quad tree
+     * @return List of all the data
+     */
+    public List<QuadTreeNode<E>> inOrder() {
+        List<QuadTreeNode<E>> list = new LinkedList<QuadTreeNode<E>>();
+        inOrderHelper(list, root);
+        return list;
+    }
+
+
+    /**
+     * Remove a Node only give a piece of data. Runs in O(n) traversal
+     * @param data The old piece of data
+     */
+    public void remove(E data) {
+        removeHelper(data, root);
+    }
+
+    /**
+     * Remove a Node given a piece of data nad the old polygon. Runs in O(logn) traversal
+     * @param data
+     */
+    public void remove(E data, Polygon poly) {
+        removeWithPolyHelper(data, poly, root);
+    }
+
+    /**
+     * Updates a region of a known node
+     * @param data
+     * @param oldPolygon
+     * @param newPolygon
+     */
+    public void update(E data, Polygon oldPolygon, Polygon newPolygon) {
+
+    }
+
+    private void updatePolygon(QuadTreeSquare curr, E data, Polygon oldPolygon, Polygon newPolygon) {
+
+    }
+
+    private QuadTreeSquare removeWithPolyHelper(E data, Polygon poly, QuadTreeSquare curr) {
+        if (curr == null) {
+            return null;
+        }
+        for (QuadTreeNode<E> node : curr.dataInSquare) {
+            if (node.value.equals(data)) {
+                curr.dataInSquare.remove(node);
+                curr.hasOverflowed = false;
+                return curr;
+            }
+        }
+        for (int i = 0; i < curr.subsquares.length; i++) {
+            //Could be Possible to intersect all four squares. If so,
+            if(checkCollision(curr.subsquares[i], poly)) {
+                removeWithPolyHelper(data, poly, curr.subsquares[i]);
+            }
+        }
+        return curr;
+    }
+
+    private QuadTreeSquare removeHelper(E data, QuadTreeSquare curr) {
+        if (curr == null) {
+            return null;
+        }
+        for (QuadTreeNode<E> node : curr.dataInSquare) {
+          if (node.value.equals(data)) {
+              curr.dataInSquare.remove(node);
+              curr.hasOverflowed = false;
+              return curr;
+          }
+        }
+        for (int i = 0; i < curr.subsquares.length; i++) {
+            //Could be Possible to intersect all four squares. If so,
+            curr.subsquares[i] = removeHelper(data, curr.subsquares[i]);
+        }
+        return curr;
+    }
+
+    public void inOrderHelper(List<QuadTreeNode<E>> list, QuadTreeSquare curr) {
+        if (curr == null) {
+            return;
+        }
+        for (QuadTreeSquare square : curr.subsquares) {
+            inOrderHelper(list, square);
+        }
+        for (QuadTreeNode<E> data : curr.dataInSquare) {
+            list.add(data);
+        }
     }
 
     private void insertHelper(QuadTreeNode<E> node, QuadTreeSquare curr) {
@@ -138,14 +263,16 @@ public class QuadTree<E> {
                     squareCenter.clone().add(new Vector(-width/2, 0, 0)));
             curr.subsquares[3] = new QuadTreeSquare(squareCenter.clone().add(new Vector(0, 0, -height/2)),
                     curr.corners.get(1), squareCenter.clone().add(new Vector(width/2, 0, 0)), squareCenter);
-            quadrants += 4;
-            curr.hasOverflowed = true;
+            quadrants+=4;
             for (QuadTreeNode<E> data : curr.dataInSquare) {
                 insertHelper(data, curr);
             }
             curr.dataInSquare.clear();
+            curr.hasOverflowed = true;
         }
     }
+
+
 
     /**
      * Strat: Check all 4 points. if a point is bounded within the box, then it has to be in the
@@ -177,12 +304,31 @@ public class QuadTree<E> {
         return false;
     }
 
-    public int getSize() {
-        return size;
+
+    private void resize() {
+        //Why? MC standards.
+        Vector newBL = root.blCorner.clone().add(new Vector(-100,0,-100));
+        Vector newBR = root.brCorner.clone().add(new Vector(100,0,-100));
+        Vector newTL = root.tlCorner.clone().add(new Vector(-100,0,100));
+        Vector newTR = root.trCorner.clone().add(new Vector(100,0,100));
+        QuadTree<E> newTree = new QuadTree<E>(newBL, newBR, newTR, newTL, this.capacity);
+        List<QuadTreeNode<E>> resizeList = inOrder();
+        for (QuadTreeNode<E> node : resizeList) {
+            newTree.insert(node.polygon, node.value);
+        }
+
+        this.root = newTree.getRoot();
     }
 
-    public QuadTreeSquare getRoot() {
-        return root;
+
+    @Override
+    public String toString() {
+        return "QuadTree: " +
+                "capacity: " + this.capacity +
+                " Bottom Left: " + root.blCorner.toString() +
+                " Bottom Right: " + root.brCorner.toString() +
+                " Top Right: " + root.trCorner.toString() +
+                " Top Left: " + root.tlCorner.toString();
     }
 
     public int getQuadrants() {

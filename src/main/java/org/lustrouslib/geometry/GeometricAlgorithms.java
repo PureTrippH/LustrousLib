@@ -5,6 +5,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class GeometricAlgorithms {
+
     /**
      * Returns The Convex Hull (border) of an Aribtrary point cloud in R2
      * @param vertexSet
