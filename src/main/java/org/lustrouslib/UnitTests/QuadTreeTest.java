@@ -18,8 +18,8 @@ public class QuadTreeTest {
 
     @Before
     public void setUp() {
-        tree = new QuadTree<>(new Vector(0, 0, 0), new Vector(100, 0, 0),
-                new Vector(100, 0, 100), new Vector(0, 0, 100), 2);
+        tree = new QuadTree<Integer>(new Vector(0, 0, 0),
+                new Vector(100, 0, 100), 2);
     }
 
     @Test(timeout = TIMEOUT)
@@ -30,9 +30,7 @@ public class QuadTreeTest {
     @Test(timeout = TIMEOUT)
     public void testBorderInit() {
         assertEquals("0.0,0.0,0.0", tree.getRoot().blCorner.toString());
-        assertEquals("100.0,0.0,0.0", tree.getRoot().brCorner.toString());
         assertEquals("100.0,0.0,100.0", tree.getRoot().trCorner.toString());
-        assertEquals("0.0,0.0,100.0", tree.getRoot().tlCorner.toString());
     }
 
     @Test(timeout = TIMEOUT)
@@ -49,6 +47,33 @@ public class QuadTreeTest {
     }
 
     @Test(timeout = TIMEOUT)
+    public void testAddCenter() {
+        Vector v11 = new Vector(50, 0, 50);
+        Vector v21 = new Vector(60, 0, 60);
+        Vector v31 = new Vector(50, 0, 60);
+        Vector v41 = new Vector(60, 0, 50);
+        ArrayList<Vector> polygon2 = new ArrayList<Vector>();
+        polygon2.add(v11);
+        polygon2.add(v21);
+        polygon2.add(v31);
+        polygon2.add(v41);
+        tree.insert(new Polygon(polygon2), 1);
+
+        Vector v1 = new Vector(0, 0, 0);
+        Vector v2 = new Vector(20, 0, 10);
+        Vector v3 = new Vector(15, 0, 25);
+        ArrayList<Vector> polygon = new ArrayList<Vector>();
+        polygon.add(v1);
+        polygon.add(v2);
+        polygon.add(v3);
+        tree.insert(new Polygon(polygon), 145);
+        tree.query(0, 0);
+        assertEquals(1, (int) (tree.query(90, 90).get(0).value));
+        assertEquals(145, (int) (tree.query(0, 0).get(0).value));
+
+    }
+
+    @Test(timeout = TIMEOUT)
     public void testAddResize() {
         Vector v1 = new Vector(101, 0, 10);
         Vector v2 = new Vector(20, 0, 10);
@@ -59,9 +84,7 @@ public class QuadTreeTest {
         polygon.add(v3);
         tree.insert(new Polygon(polygon), 12);
         assertEquals("-100.0,0.0,-100.0", tree.getRoot().blCorner.toString());
-        assertEquals("200.0,0.0,-100.0", tree.getRoot().brCorner.toString());
         assertEquals("200.0,0.0,200.0", tree.getRoot().trCorner.toString());
-        assertEquals("-100.0,0.0,200.0", tree.getRoot().tlCorner.toString());
         assertEquals(12, (int) (tree.query(15, 10).get(0).value));
     }
 
@@ -76,9 +99,7 @@ public class QuadTreeTest {
         polygon.add(v3);
         tree.insert(new Polygon(polygon), 12);
         assertEquals("-200.0,0.0,-200.0", tree.getRoot().blCorner.toString());
-        assertEquals("300.0,0.0,-200.0", tree.getRoot().brCorner.toString());
         assertEquals("300.0,0.0,300.0", tree.getRoot().trCorner.toString());
-        assertEquals("-200.0,0.0,300.0", tree.getRoot().tlCorner.toString());
         assertEquals(12, (int) (tree.query(15, 10).get(0).value));
     }
 
@@ -108,8 +129,7 @@ public class QuadTreeTest {
         assertEquals(8, tree.getQuadrants());
         assertEquals(1, tree.getRoot().subsquares[3].dataInSquare.size());
         assertEquals(12, (int) tree.getRoot().subsquares[3].dataInSquare.get(0).value);
-        assertEquals(1, (int) tree.getRoot().subsquares[0].subsquares[0].dataInSquare.size());
-        assertEquals(256, (int) tree.getRoot().subsquares[0].subsquares[0].dataInSquare.get(0).value);
+        assertEquals(256, (int) tree.query(85, 85).get(0).value);
     }
 
     @Test(timeout = TIMEOUT)
@@ -194,5 +214,48 @@ public class QuadTreeTest {
         tree.update(12, oldPoly, newPolyToCheck);
         assertEquals(12, (int) tree.query(60,60).get(0).value);
     }
+
+    @Test(timeout = TIMEOUT)
+    public void test() {
+        Vector v1 = new Vector(10, 0, 10);
+        Vector v2 = new Vector(20, 0, 10);
+        Vector v3 = new Vector(15, 0, 35);
+        ArrayList<Vector> polygon = new ArrayList<Vector>();
+        polygon.add(v1);
+        polygon.add(v2);
+        polygon.add(v3);
+        Polygon oldPoly = new Polygon(polygon);
+        tree.insert(oldPoly, 12);
+        assertEquals(12, (int) (tree.query(15, 10).get(0).value));
+        System.out.println("First Passed!");
+        //Add Two To Cause a Split
+
+        Vector v12 = new Vector(90, 0, 90);
+        Vector v22 = new Vector(90, 0, 95);
+        Vector v32 = new Vector(100, 0, 100);
+        ArrayList<Vector> polygon2 = new ArrayList<Vector>();
+        polygon2.add(v12);
+        polygon2.add(v22);
+        polygon2.add(v32);
+        tree.insert(new Polygon(polygon2), 1);
+        assertEquals(1, (int) (tree.query(90, 90).get(0).value));
+
+        //New Polygon
+        System.out.println("First Two Passed!");
+        Vector v1n = new Vector(10, 0, 10);
+        Vector v2n = new Vector(20, 0, 10);
+        Vector v3n = new Vector(15, 0, 35);
+        Vector v4n = new Vector(60, 0, 60);
+        ArrayList<Vector> newPoly = new ArrayList<Vector>();
+        newPoly.add(v1n);
+        newPoly.add(v2n);
+        newPoly.add(v3n);
+        newPoly.add(v4n);
+        Polygon newPolyToCheck = new Polygon(newPoly);
+        tree.update(12, oldPoly, newPolyToCheck);
+        assertEquals(12, (int) tree.query(60,60).get(0).value);
+    }
+
+
 
 }

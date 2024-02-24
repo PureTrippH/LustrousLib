@@ -40,33 +40,70 @@ public class QuadTree<E> {
      * The Representation of a Square of data
      */
     public class QuadTreeSquare {
-        public Vector blCorner;
-        public Vector brCorner;
-        public Vector trCorner;
-        public Vector tlCorner;
         public boolean hasOverflowed;
         public QuadTreeSquare[] subsquares;
         public List<QuadTreeNode<E>> dataInSquare;
         ArrayList<Vector> corners;
-        QuadTreeSquare(Vector blCorner, Vector brCorner, Vector trCorner, Vector tlCorner) {
-            this.corners = new ArrayList<>();
-            //This is some fucking YandereDev Code. TODO: Clean the Italian Restaurant
+        public Vector blCorner;
+        public Vector trCorner;
+        public int width;
+        public int height;
+        QuadTreeSquare(Vector blCorner, Vector trCorner) {
+            this.corners = new ArrayList<Vector>();
             corners.add(blCorner);
-            this.blCorner = blCorner;
-            corners.add(brCorner);
-            this.brCorner = brCorner;
             corners.add(trCorner);
-            this.trCorner = trCorner;
-            corners.add(tlCorner);
-            this.tlCorner = tlCorner;
+            this.blCorner = getMinimumVecor();
+            this.trCorner = getMaximumVector();
+            this.width = (int) (trCorner.getX() - blCorner.getX());
+            this.height = (int) (trCorner.getZ() - blCorner.getZ());
             this.subsquares = (QuadTreeSquare[]) Array.newInstance(QuadTreeSquare.class, 4);
             this.dataInSquare = new ArrayList<QuadTreeNode<E>>(4);
         }
 
-        public Vector getVec() {
-            return blCorner;
+        public boolean isInSquare(Vector vec) {
+            return vec.clone().isInAABB(this.getMinimumVecor().clone(), this.getMaximumVector().clone());
+        }
+
+        public Vector getMaximumVector() {
+            if (corners.isEmpty()) {
+                return null;
+            }
+
+            double maxX = Double.MIN_VALUE;
+            double maxY = 0;
+            double maxZ = Double.MIN_VALUE;
+
+            for (Vector vector : corners) {
+                maxX = Math.max(maxX, vector.getX());
+                maxY = Math.max(maxY, vector.getY());
+                maxZ = Math.max(maxZ, vector.getZ());
+            }
+
+            return new Vector(maxX, maxY, maxZ);
+        }
+        public Vector getMinimumVecor() {
+            if (corners.isEmpty()) {
+                return null;
+            }
+
+            double minX = Double.MAX_VALUE;
+            double minY = 0;
+            double minZ = Double.MAX_VALUE;
+
+            for (Vector vector : corners) {
+                minX = Math.min(minX, vector.getX());
+                minY = Math.min(minY, vector.getY());
+                minZ = Math.min(minZ, vector.getZ());
+            }
+
+            return new Vector(minX, minY, minZ);
+        }
+        @Override
+        public String toString() {
+            return ("Curr Square: (" + this.blCorner + ")  (" + this.trCorner + ") Capacity: " + capacity + " Size: " + this.dataInSquare.size());
         }
     }
+
 
     private QuadTreeSquare root;
     private int capacity;
@@ -92,21 +129,15 @@ public class QuadTree<E> {
     /**
      * Creates a Quadtree with a set boundary for the universe
      * @param blCorner Bottom left Vector of the Boundary
-     * @param brCorner Bottom Right Vector of the Boundary
      * @param trCorner Top Right Vector of the Boundary
-     * @param tlCorner Top Left Vector of the Boundary
      */
-    public QuadTree(Vector blCorner, Vector brCorner, Vector trCorner, Vector tlCorner, int capacity) {
-        this.root = new QuadTreeSquare(blCorner, brCorner, trCorner, tlCorner);
+    public QuadTree(Vector blCorner, Vector trCorner, int capacity) {
+        this.root = new QuadTreeSquare(blCorner, trCorner);
         this.capacity = capacity;
         this.size = 0;
         this.quadrants = 0;
     }
 
-    public QuadTree(Vector blCorner, Vector trCorner, int capacity) {
-        this(blCorner, blCorner.clone().add(new Vector(trCorner.getX(), 0, 0)),
-                trCorner, blCorner.clone().add(new Vector(0, 0, trCorner.getZ())), capacity);
-    }
 
     /**
      * Inserts a new Polygonal region into the quad tree
@@ -115,7 +146,7 @@ public class QuadTree<E> {
      */
     public void insert(Polygon polygon, E data) {
         for (Vector vec : polygon.getVertices()) {
-            if (!(vec.clone().isInAABB(root.blCorner, root.trCorner))) {
+            if (!(this.root.isInSquare(vec))) {
                 resize();
                 insert(polygon, data);
                 return;
@@ -245,20 +276,26 @@ public class QuadTree<E> {
     }
 
     private void insertHelper(QuadTreeNode<E> node, QuadTreeSquare curr) {
+        // If the current square has space and has not overflowed
         if (curr.dataInSquare.size() < capacity && !curr.hasOverflowed) {
-            if (curr.dataInSquare.contains(node)) {
-                return;
+            // Add the node to the current square
+            if (!curr.dataInSquare.contains(node)) {
+                curr.dataInSquare.add(node);
+                size++;
             }
-            curr.dataInSquare.add(node);
-            size++;
-            subdivide(curr);
+            // Check if the square needs to be subdivided
+            if (curr.dataInSquare.size() == capacity) {
+                subdivide(curr);
+            }
             return;
-        } else {
-            for (int i = 0; i < curr.subsquares.length; i++) {
-                //Could be Possible to intersect all four squares. If so,
-                if(checkCollision(curr.subsquares[i], node.polygon)) {
-                    insertHelper(node, curr.subsquares[i]);
-                }
+        }
+
+        // If the current square is full or has overflowed
+        for (QuadTreeSquare subsquare : curr.subsquares) {
+            if (subsquare != null && !subsquare.hasOverflowed && checkCollision(subsquare, node.polygon)) {
+                // Recursively insert the node into the intersecting subsquare
+                insertHelper(node, subsquare);
+                return; // Only insert into one subsquare
             }
         }
     }
@@ -278,7 +315,7 @@ public class QuadTree<E> {
             return curr.dataInSquare;
         } else {
             for (int i = 0; i < 4; i++) {
-                if (currPos.clone().isInAABB(curr.subsquares[i].blCorner, curr.subsquares[i].trCorner)) {
+                if (curr.subsquares[i].isInSquare(currPos)) {
                     return queryHelper(currPos, curr.subsquares[i]);
                 }
             }
@@ -287,32 +324,38 @@ public class QuadTree<E> {
     }
 
     private void subdivide(QuadTreeSquare curr) {
-        if(curr.dataInSquare.size() == capacity) {
-            System.out.println("Overflow test");
-            double width = curr.corners.get(0).getX() + curr.corners.get(1).getX();
-            double height = curr.corners.get(0).getZ() + curr.corners.get(3).getZ();
-            Vector squareCenter = new Vector(width/2,
-                    0, (height)/2);
-            List<QuadTreeNode<E>> savedNodes = curr.dataInSquare;
-            curr.subsquares[0] = new QuadTreeSquare(squareCenter, squareCenter.clone().add(new Vector(width/2, 0, 0)),
-                    curr.corners.get(2), squareCenter.clone().add(new Vector(0, 0, height/2)));
-            curr.subsquares[1] = new QuadTreeSquare(squareCenter.clone().add(new Vector(-width/2, 0, 0)),
-                    squareCenter, squareCenter.clone().add(new Vector(0, 0, height/2)),curr.corners.get(3));
-            curr.subsquares[2] = new QuadTreeSquare(curr.corners.get(0),
-                    squareCenter.clone().add(new Vector(0, 0, -height/2)), squareCenter,
-                    squareCenter.clone().add(new Vector(-width/2, 0, 0)));
-            curr.subsquares[3] = new QuadTreeSquare(squareCenter.clone().add(new Vector(0, 0, -height/2)),
-                    curr.corners.get(1), squareCenter.clone().add(new Vector(width/2, 0, 0)), squareCenter);
-            quadrants+=4;
-            for (QuadTreeNode<E> data : curr.dataInSquare) {
-                insertHelper(data, curr);
-            }
-            curr.dataInSquare.clear();
+        if (curr.dataInSquare.size() == capacity && !curr.hasOverflowed) {
+            System.out.println(curr);
+            List<QuadTreeNode<E>> savedNodes = new ArrayList<>(curr.dataInSquare);
+            Vector center = curr.blCorner.clone().midpoint(curr.trCorner.clone());
+
+            // Calculate the midpoints for x and z coordinates
+            double midX = (curr.blCorner.getX() + curr.trCorner.getX()) / 2.0;
+            double midZ = (curr.blCorner.getZ() + curr.trCorner.getZ()) / 2.0;
+
+            // Quadrant 1
+            curr.subsquares[0] = new QuadTreeSquare(center.clone(), curr.trCorner.clone());
+            // Quadrant 2
+            curr.subsquares[1] = new QuadTreeSquare(new Vector(midX, 0, curr.blCorner.getZ()), new Vector(curr.trCorner.getX(), 0, midZ));
+            // Quadrant 3
+            curr.subsquares[2] = new QuadTreeSquare(curr.blCorner.clone(), center.clone());
+            // Quadrant 4
+            curr.subsquares[3] = new QuadTreeSquare(new Vector(curr.blCorner.getX(), 0, midZ), new Vector(midX, 0, curr.trCorner.getZ()));
+            quadrants += 4;
+
             curr.hasOverflowed = true;
+            curr.dataInSquare.clear();
+
+            // Insert saved nodes into the new subsquares
+            for (QuadTreeNode<E> node : savedNodes) {
+                for (int i = 0; i < curr.subsquares.length; i++) {
+                    if (checkCollision(curr.subsquares[i], node.polygon)) {
+                        insertHelper(node, curr.subsquares[i]);
+                    }
+                }
+            }
         }
     }
-
-
 
     /**
      * Strat: Check all 4 points. if a point is bounded within the box, then it has to be in the
@@ -325,12 +368,13 @@ public class QuadTree<E> {
         if (curr == null) {
             return false;
         }
+        for (Vector v : polygon.getVertices()) {
+            if (curr.isInSquare(v) && !v.equals(new Vector(0, 0, 0))) return true;
+        }
         //Create the bounds of the new QuadTreeRectangle
         for (int i = 0; i < polygon.getVertices().size(); i++) {
             Vector aVec = polygon.getVertices().get(i % polygon.getVertices().size());
-            //Check if a point is within a bound, if so, then
-            if (aVec.isInAABB(curr.corners.get(0), curr.corners.get(2))) return true;
-            Vector bVec = polygon.getVertices().get((i + 1) % polygon.getVertices().size());
+            Vector bVec = polygon.getVertices().get((i + 1) % polygon.getVertices().size()).clone();
             //loop to find every possible corner
             for (int cornerIndex = 0; cornerIndex < curr.corners.size(); cornerIndex++) {
                 Vector cVec = curr.corners.get(cornerIndex % curr.corners.size());
@@ -348,10 +392,8 @@ public class QuadTree<E> {
     private void resize() {
         //Why? MC standards.
         Vector newBL = root.blCorner.clone().add(new Vector(-100,0,-100));
-        Vector newBR = root.brCorner.clone().add(new Vector(100,0,-100));
-        Vector newTL = root.tlCorner.clone().add(new Vector(-100,0,100));
         Vector newTR = root.trCorner.clone().add(new Vector(100,0,100));
-        QuadTree<E> newTree = new QuadTree<E>(newBL, newBR, newTR, newTL, this.capacity);
+        QuadTree<E> newTree = new QuadTree<E>(newBL, newTR, this.capacity);
         List<QuadTreeNode<E>> resizeList = inOrder();
         for (QuadTreeNode<E> node : resizeList) {
             newTree.insert(node.polygon, node.value);
@@ -365,10 +407,8 @@ public class QuadTree<E> {
     public String toString() {
         return "QuadTree: " +
                 "capacity: " + this.capacity +
-                " Bottom Left: " + root.blCorner.toString() +
-                " Bottom Right: " + root.brCorner.toString() +
-                " Top Right: " + root.trCorner.toString() +
-                " Top Left: " + root.tlCorner.toString();
+                " Bottom Left: " + root.corners.get(0).toString() +
+                " Top Right: " + root.corners.get(1).toString();
     }
 
     public int getQuadrants() {
